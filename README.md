@@ -1,4 +1,4 @@
-# Python API for the Full-Metadata Format
+# A Python API for the Full-Metadata Format
 
 The Full-Metadata Format (FMF) is described in
 [http://arxiv.org/abs/0904.1299](http://arxiv.org/abs/0904.1299). This
