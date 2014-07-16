@@ -1,0 +1,223 @@
+-*- coding: utf-8 -*-
+
+Copyright (c) 2014, Rectorate of the University of Freiburg
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright
+  notice, this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright
+  notice, this list of conditions and the following disclaimer in the
+  documentation and/or other materials provided with the distribution.
+* Neither the name of the Freiburg Materials Research Center,
+  University of Freiburg nor the names of its contributors may be used to
+  endorse or promote products derived from this software without specific
+  prior written permission.
+
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+@startuml
+
+package streamlib {
+class Protocol {
+    verify_packet(Packet packet, Context context)
+    Context new_context(Stream stream)
+}
+
+class Source {
+    inject_into(Stream stream)
+}
+
+class Destination {
+    Protocol protocol
+    receive_packet(Packet packet, Context context)
+    Context new_context(Stream stream)
+}
+
+class Adapter {
+    Protocol input_protocol
+    Protocol output_protocol
+    iterable<Packet> adapt_packet(Packet packet, Context context)
+    Context new_context(Stream stream)
+}
+
+class Stream {
+    Agent agent
+    Destination destination
+    inject_packet(Packet packet)
+    inject_packets(iterable<Packet> packets)
+    set_protocol(Protocol protocol)
+}
+
+class Agent {
+    register_adapter(Adapter adapter)
+    unregister_adapter(Adapter adapter)
+    find_adapter(Protocol input_protocol, Protocol output_protocol)
+}
+}
+
+package pyfmflib.cl1 {
+
+class Header {
+    str coding
+    str fmfversion
+    str comment_char
+    str delimiter
+    property str delimiter_char
+    dict<str, str> extra_parameters
+    bool __eq__(Header other)
+    bool __ne__(Header other)
+}
+
+Comment --|> str
+
+class KeyValue {
+    str key
+    str value
+    bool __eq__(KeyValue other)
+    bool __ne__(KeyValue other)
+}
+
+class Section {
+    str identifier
+    list entries
+    bool __eq__(Section other)
+    bool __ne__(Section other)
+}
+
+class KeyValueSection {
+    list<Comment|KeyValue> entries
+}
+KeyValueSection --|> Section
+KeyValueSection o-- "0..*" KeyValue
+KeyValueSection o-- "0..*" Comment
+
+class ReferenceSection {
+    str identifier = "*reference"
+}
+ReferenceSection --|> KeyValueSection
+
+class MetaSection {
+    str __getitem__(str key)
+    __setitem__(str key, str value)
+}
+MetaSection --|> KeyValueSection
+
+class TableDefinitions {
+    str identifier = "*table definitions"
+}
+TableDefinitions --|> KeyValueSection
+
+class DataDefinitions
+DataDefinitions --|> KeyValueSection
+
+class DataRow
+DataRow --|> list
+
+class Data {
+    list<Comment|DataRow> entries
+}
+Data --|> Section
+Data o-- "0..*" DataRow
+Data o-- "0..*" Comment
+
+class EndFMFPacket
+class FlushDataColumnsPacket
+class SectionHeader
+
+class LineBasedDestination {
+    LineBasedProtocol protocol
+    receive_header(Header header, Context context)
+    receive_comment(Comment comment, Context context)
+    receive_section_header(SectionHeader section_header, Context context)
+    receive_key_value(KeyValue key_value, Context context)
+    receive_data_row(DataRow data_row, Context context)
+    receive_end_fmf(EndFMF end_fmf, Context context)
+}
+LineBasedDestination --|> Destination
+LineBasedDestination o-- "1" LineBasedProtocol
+
+class FMF {
+    Header header
+    list<Comment> global_comments
+    list<MetaSection> meta_sections
+    list<TableDefinitions|DataDefinition|Data> table_sections
+    MetaSection __getitem__(str identifier)
+    bool __eq__(FMF other)
+    bool __ne__(FMF other)
+}
+FMF --|> LineBasedDestination
+FMF --|> Source
+FMF o-- "1" Header
+FMF o-- "0..*" Comment
+FMF o-- "1" ReferenceSection
+FMF o-- "0..*" MetaSection
+FMF o-- "0..1" TableDefinitions
+FMF o-- "0..*" DataDefinitions
+FMF o-- "0..*" Data
+
+class LineBasedProtocol
+LineBasedProtocol --|> Protocol
+LineBasedProtocol --> Header
+LineBasedProtocol --> Comment
+LineBasedProtocol --> SectionHeader
+LineBasedProtocol --> KeyValue
+LineBasedProtocol --> DataRow
+LineBasedProtocol --> EndFMFPacket
+
+class DataColumn
+DataColumn --|> list
+
+class DataColumnProtocol
+DataColumnProtocol --|> Protocol
+DataColumnProtocol --> DataColumn
+DataColumnProtocol --> FlushDataColumnsPacket
+
+class Column2LineAdapter {
+    DataColumnProtocol input_protocol
+    LineBasedProtocol output_protocol
+}
+Column2LineAdapter --|> Adapter
+Column2LineAdapter o-- "1" DataColumnProtocol
+Column2LineAdapter o-- "1" LineBasedProtocol
+
+class FileLikeDestination {
+    FileLike handle
+}
+FileLikeDestination --|> LineBasedDestination
+
+class DefaultAgent
+DefaultAgent --|> Agent
+DefaultAgent o-- "1" Column2LineAdapter
+DefaultAgent --> Stream
+
+class "<<utility>>" {
+    list<DataRow> columns2rows(iterable<DataColumn> columns)
+    list<DataRow> rowmajor2rows(NestedIterable nested_iterable, [Callable formatter])
+    list<DataRow> columnmajor2rows(NestedIterable nested_iterable, [Callable formatter])
+    DataRow format_data_row(Iterable iterable, Callable formatter)
+    DataColumn format_data_column(Iterable iterable, Callable formatter)
+    DefaultAgent new_default_agent()
+    FMF new_empty_fmf()
+    FMF new_fmf_template()
+    FMF new_fmf_with_default_header()
+    FMF new_minimal_fmf(str title, str creator, str created, str place)
+    ReferenceSection new_minimal_reference_section(str title, str creator, str created, str place)
+    write(Source source, str|FileLike filename_or_filelike, [list<Adapter> adapters])
+    inject_columns(Stream stream, iterable<DataColumn> columns)
+}
+
+@enduml

@@ -1,0 +1,6 @@
+*.py[co]
+__pycache__
+build
+*.egg-info
+.tox
+api.plantuml.png
