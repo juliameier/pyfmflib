@@ -1,49 +1,46 @@
 import pytest
+import numpy
 
-class Table():
+from API import Table, Fmf,Meta_section
 
-    def  __init__(
-            self,
-            name,
-            symbol,
-            data_definitions,
-            no_columns,
-            no_rows,
-            data,
-            comments
-    ):
+class test_table():
 
-        self.name = name
-        self.symbol = symbol
-        self.data_definitions = data_definitions
-        self.no_columns = no_columns
-        self.no_rows = no_rows
-        self.data = data
-        self.comments = comments
+    def __int__(self):
+        self.table = Table.Table.initialize()
 
-def create_table_object(*args):
+    def test_create_table(self):
+        assert self.table is not None
 
-    print (args)
-    print (len(args))
+    def test_table_object(self):
+        assert isinstance(self.table, Table.Table)
 
-    if len(args) < 2:
-        raise Exception('Number of arguments specified is invalid')
+    def test_table_with_arguments(self):
 
-    return Table(name=None, symbol=None, data_definitions=[], no_columns=None, no_rows=None, data=[], comments=None)
+        # Specifying less arguments
+    #    create_table_object('Name')
 
-def test_create_table():
-    create_table_object()
+        # Specifying the minimum 2 arguments
+        Table.initialize('Name', 'Symbol')
 
-def test_table_object():
-    assert isinstance(create_table_object(), Table)
+        assert Table is not None
 
-def test_table_with_arguments():
+    def test_add_table_with_data(self):
+        fmf_object = Fmf.initialize()
 
-    # Specifying less arguments
-#    create_table_object('Name')
+        fmf_object.table_sections = [
+            Table.initialize('Table Name', 'Table Symbol',
+                            data_definitions=[
+                                Meta_section.Meta_section_entry.initialize('voltage', 'V [V]'),
+                                Meta_section.Meta_section_entry.initialize('current', 'I(V) [A]')],
 
-    # Specifying the minimum 2 arguments
-    create_table_object('Name', 'Symbol')
+                            no_columns = 2,
+                            no_rows = 3,
+
+                            data = numpy.array([[1, 2], [3, 4], [5,6]], numpy.int32)
+                            )
+    ]
+
+
 
 
 if __name__ == '__main__':

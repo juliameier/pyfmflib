@@ -1,40 +1,18 @@
 import encodings
 
 import pytest
+from API import Header_section
 
-class Header():
+class test_header_section():
 
-    def __init__(
-            self,
-            fmf_version,
-            encoding,
-            separator,
-            comment_char,
-            misc_params
-    ):
+    def __int__(self):
+        self.header_section = Header_section.Header.initialize()
 
-        self.fmf_version = fmf_version
-        self.encoding = encoding
-        self.field_separator = separator
-        self.comment_char = comment_char
-        self.misc_params = misc_params
+    def test_create_header(self):
+#       create_header_section()
+        header_section = Header_section.Header.initialize('fmf-version:1.0', 'utf-8', '\t', ';')
 
-
-
-def create_header_section(*args):
-
-    print args
-
-    print len(args)
-
-    if len(args) < 4:
-        raise Exception('Mandatory keyword or parameter is missing')
-
-    return Header(fmf_version=None, encoding=None, separator=None, comment_char=None, misc_params=None)
-
-def test_create_header():
-#    create_header_section()
-    create_header_section('fmf-version:1.0', 'utf-8', '\t', ';')
+        assert header_section is not None
 
 if __name__ == '__main__':
     pytest.main([__file__])

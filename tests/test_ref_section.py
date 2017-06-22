@@ -1,55 +1,37 @@
 import pytest
 import inspect
 
-class Reference_section():
+from API import Reference_section
 
-    def  __init__(
-            self,
-            title,
-            creator,
-            created,
-            place,
-            contact
-    ):
+class test_reference_section():
 
-        self.title = title
-        self.creator = creator
-        self.created = created
-        self.place = place
-        self.contact = contact
+    def __int__(self):
+        self.reference_section = Reference_section.Reference_section.initialize()
 
+    def get_number_of_args(func):
+        return len(func.func_code.co_varnames)
 
-def create_reference_section(*args):
+    def test_empty_reference_section(self):
 
-    # args represents the regular arguments
-    # kwargs represents the keyword arguments
-    print args
+        assert self.reference_section is not None
 
-    print len(args)
+    def test_create_ref_with_less_arguments(self):
 
-    if len(args) > 0 and len(args) < 4:
-        raise Exception('Number of arguments specified is invalid')
-
-    return Reference_section(title=None, creator=None, created=None, place=None, contact=None)
+        ref_section = Reference_section.Reference_section.initialize('title', 'created')
+    #    args = len(inspect.getargspec(create_reference_section('title', 'created')))
+        assert ref_section is not None
 
 
-def get_number_of_args(func):
-    return len(func.func_code.co_varnames)
+    def test_create_ref_with_arguments(self):
 
-def test_create_reference_section():
-    create_reference_section()
+#        Reference_section.Reference_section.initialize('Title', 'Creator', 'Created', 'Place')
+        ref_section = Reference_section.Reference_section.initialize('Title', 'Creator', 'Created', 'Place', 'Contact')
 
-def test_create_ref_with_less_arguments():
-    create_reference_section('title', 'created')
-#    args = len(inspect.getargspec(create_reference_section('title', 'created')))
-
-def test_create_ref_with_arguments():
-    create_reference_section('Title', 'Creator', 'Created', 'Place')
-    create_reference_section('Title', 'Creator', 'Created', 'Place', 'Contact')
+        assert ref_section is not None
 
 
-def test_ref_object():
-    assert isinstance(create_reference_section(), Reference_section)
+    def test_ref_object(self):
+        assert isinstance(self.reference_section, Reference_section.Reference_section)
 
 
 if __name__ == '__main__':
