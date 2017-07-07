@@ -1,46 +1,40 @@
-#import nose
 import pytest
 import inspect
 import numpy
-import unittest
 
-from API.Fmf import FMF
+from API import Fmf
 
-class Test_Fmf:
+class test_fmf():
 
-    def setup(self):
-        self.fmf_object = FMF()
+    def __int__(self):
+        self.fmf_object = Fmf.FMF.initialize()
+
 
     def test_empty_fmf(self):
+
         assert self.fmf_object is not None
 
     def test_empty_fmf_instance(self):
 
-        assert isinstance(self.fmf_object, FMF)
+        assert isinstance(self.fmf_object, Fmf.FMF)
 
     def test_create_fmf_with_reference(self):
 
-        self.fmf_object.reference_section = self.fmf_object.set_reference(self, 'title', 'Creator', 'Created', 'Place')
+        self.fmf_object = Fmf.set_reference(title='title', creator='Creator', created='Created', place='Place')
 
-        self.fmf_object.meta_sections.append(self.fmf_object.reference_section)
-
-        assert self.fmf_object.meta_sections is not None
-
-        assert len(self.fmf_object.meta_sections) > 0
+        assert self.fmf_object is not None
 #        assert isinstance(self.fmf_object, Fmf.FMF)
-
-    def test_create_fmf_meta_section(self):
-        self.fmf_object.meta_sections.append(FMF.add_meta_section(self.fmf_object,'Name'))
-
-        assert self.fmf_object.meta_sections is not None
-
-        assert len(self.fmf_object.meta_sections) > 0
 
 
     def test_create_fmf_with_table(self):
 
-        self.fmf_object.table_sections.append(FMF.add_table(self.fmf_object, 'Table Name', 'Table Symbol'))
+        self.fmf_object.table_sections = [Fmf.add_table('Table Name', 'Table Symbol')]
 
-        assert self.fmf_object.table_sections is not None
 
-        assert len(self.fmf_object.table_sections) > 0
+    def test_create_fmf_meta_section(self):
+
+        self.fmf_object.meta_sections = [Fmf.add_meta_section('Name')]
+        
+
+if __name__ == '__main__':
+    pytest.main([__file__])
