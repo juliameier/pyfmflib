@@ -1,14 +1,16 @@
-from API import Reference_section, Table, Meta_section
+from API.Meta_section import Meta_section
+from API.Reference_section import Reference_section
+from API.Table import Table
 
-class FMF(object):
+class FMF:
+    def __init__(self):
 
-    def __init__(self, header, meta_sections, tables, global_comments, compliance_level):
-
-        self.header = header
-        self.meta_sections = meta_sections
-        self.table_sections = tables
-        self.global_comments = global_comments
-        self.compliance_level = compliance_level
+            self.header = None
+            self.reference_section = None
+            self.meta_sections = []
+            self.table_sections = []
+            self.global_comments = []
+            self.compliance_level = None
 
 
     def initialize(*args, **kwargs):
@@ -22,15 +24,23 @@ class FMF(object):
         return FMF(header=None, meta_sections=[], tables=[], global_comments=[], compliance_level=None)
 
 
-    def set_reference(title, creator, place, created, contact):
+    def set_reference(self, title, creator, place, created, contact):
+        self.reference_section = Reference_section(title, creator, created, place, contact)
 
-        return Reference_section.create_reference_section(title, creator, created, place, contact)
+        return self.reference_section
 
 
-    def add_table(name, symbol):
+    def add_table(self, name, symbol):
 
-        return Table.create_table_object('Name', 'Symbol')
+        table = Table(name, symbol)
 
-    def add_meta_section(name):
+        return table
 
-        return Meta_section.initialize('Name')
+    def add_meta_section(self,name):
+
+        if name.find("*") != -1:
+            raise Exception(" '*' is not allowed as first character")
+
+        meta_section = Meta_section(name)
+
+        return self.meta_sections.append(meta_section)

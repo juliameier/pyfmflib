@@ -1,20 +1,18 @@
 class Meta_section(object):
 
-    def __int__(self, name, entries, comments):
-
+    def __init__(self,name):
         self.name = name
-        self.entries = entries
-        self.comments = comments
-
+        self.entries = []
+        self.comments = []
 
     def initialize(*args):
         print args
         return Meta_section(name=None, entries=[], comments=[])
 
 
-class Meta_section_entry():
+class Meta_section_entry:
 
-    def __int__(self, key, value):
+    def __init__(self, key, value):
 
         self.key = key
         self.value = value
