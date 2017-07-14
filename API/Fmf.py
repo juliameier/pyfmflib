@@ -38,9 +38,26 @@ class FMF:
 
     def add_meta_section(self,name):
 
+        if self.meta_sections is not None:
+            for item in self.meta_sections:
+                if item.name == name:
+                    raise Exception('Meta section with this name already exists')
+
         if name.find("*") != -1:
             raise Exception(" '*' is not allowed as first character")
 
         meta_section = Meta_section(name)
 
-        return self.meta_sections.append(meta_section)
+#        self.meta_sections.append(meta_section)
+
+        return meta_section
+
+    def get_meta_section(self, name):
+        if self.meta_sections is not None:
+            for item in self.meta_sections:
+                if item.name == name:
+                    print ('Meta section found')
+                    return item
+
+                else:
+                    raise Exception('Meta section with specified name does not exist')
