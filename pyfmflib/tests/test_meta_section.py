@@ -1,8 +1,8 @@
 import pytest
 
 
-from API.Meta_section import Meta_section, Meta_section_entry
-from API.Fmf import FMF
+from pyfmflib.meta_section import Meta_section, Meta_section_entry
+from pyfmflib.fmf import FMF
 
 class Test_Meta_Section:
 

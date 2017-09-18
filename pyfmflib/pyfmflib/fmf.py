@@ -1,6 +1,7 @@
-from API.Meta_section import Meta_section
-from API.Reference_section import Reference_section
-from API.Table import Table
+
+from pyfmflib.meta_section import Meta_section
+from pyfmflib.reference_section import Reference_section
+from pyfmflib.table import Table
 
 class FMF:
     def __init__(self):

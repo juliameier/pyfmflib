@@ -1,7 +1,7 @@
 import pytest
 import numpy
 
-from API import Table, Fmf,Meta_section
+from pyfmflib import table, fmf, meta_section
 
 class test_table():
 

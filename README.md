@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 * ./README.md             -- this file
 * ./API                   -- API definition
-* ./tests/                -- tests implementing the API
+* ./pyfmflib/tests/       -- tests implementing the API
 * ./pyfmflib/	          -- the pyfmflib package
 * ./streamlib_ansatz      -- skeleton of a different ansatz of implementation
 
@@ -50,7 +50,7 @@ The acceptance tests are based on py.test. After installing
 `pyfmflib` run them with
 
 ```
-py.test tests/
+py.test pyfmflib/tests/
 ```
 
 ### Status
