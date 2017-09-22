@@ -30,43 +30,129 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#import nose
-import pytest
-import inspect
-import numpy
-import unittest
+# import nose
+# import pytest
+# import inspect
+# import numpy
+# import unittest
 
 from pyfmflib.fmf import FMF
+from pyfmflib.table import FMFTable
 
-class Test_Fmf:
-
+class TestFMF:
     def setup(self):
         self.fmf_object = FMF()
+
+    # strict API example
+    def test_initialize_empty(self):
+        fmf0 = FMF()
+        fmf = fmf0.initialize()
+        assert fmf != None
+        assert isinstance(fmf, FMF)
+        assert fmf0 == fmf
+
+    def test_initialize_reference(self):
+        fmf = FMF().initialize('test title', 'me', \
+                             'aldebaran, universe', '1970-01-01')
+        assert fmf != None
+        assert isinstance(fmf, FMF)
+        assert len(fmf.meta_sections) == 1
+        ref = fmf.meta_sections[0]
+        assert ref.entries == ['test title', 'me', \
+                             'aldebaran, universe', '1970-01-01']
+
+    def test_initialize_reference_full(self):
+        fmf = FMF().initialize('test title', 'me', \
+                             'aldebaran, universe', '1970-01-01', \
+                             'tux@example.com')
+        assert fmf != None
+        assert isinstance(fmf, FMF)
+        assert len(fmf.meta_sections) == 1
+        ref = fmf.meta_sections[0]
+        assert ref.entries == ['test title', 'me', \
+                             'aldebaran, universe', '1970-01-01', \
+                             'tux@example.com']
+
+    def test_set_reference(self):
+        fmf = FMF()
+        fmf.set_reference('test title', 'me', \
+                             'aldebaran, universe', '1970-01-01')
+        assert fmf != None
+        assert isinstance(fmf, FMF)
+        assert len(fmf.meta_sections) == 1
+        ref = fmf.meta_sections[0]
+        assert ref.entries == ['test title', 'me', \
+                             'aldebaran, universe', '1970-01-01']
+
+    def test_set_reference_full(self):
+        fmf = FMF()
+        fmf.set_reference('test title', 'me', \
+                             'aldebaran, universe', '1970-01-01', \
+                             'tux@example.com')
+        assert fmf != None
+        assert isinstance(fmf, FMF)
+        assert len(fmf.meta_sections) == 1
+        ref = fmf.meta_sections[0]
+        assert ref.entries == ['test title', 'me', \
+                             'aldebaran, universe', '1970-01-01', \
+                             'tux@example.com']
+        fmf.set_reference('Why to always carry a towel', 'me', \
+                             'earth, universe', '1970-01-01', \
+                             'bla@example.com')
+        assert len(fmf.meta_sections) == 1
+        ref = fmf.meta_sections[0]
+        assert ref.entries == ['Why to always carry a towel', 'me', \
+                             'earth, universe', '1970-01-01', \
+                             'bla@example.com']
+
+    def test_get_table_iteratively(self):
+        fmf = FMF()
+        table = FMFTable()
+        fmf.tables = [table]
+        fmftable = fmf.get_table()
+        assert fmftable == table
+        with pytest.raises(UndefinedObject) as e_info:
+            fmf.get_table()
+
+    def test_get_table_by_symbol(self):
+        fmf = FMF()
+        table = FMFTable().initialize('table', 'tab')
+        fmf.tables = [table]
+        fmftable = fmf.get_table('tab')
+        assert fmftable == table
+        with pytest.raises(UndefinedObject) as e_info:
+            fmf.get_table('tub')
+
+    def test_get_table_mixed(self):
+        fmf = FMF()
+        table1 = FMFTable().initialize('table1', 'tab1')
+        table2 = FMFTable().initialize('table2', 'tab2')
+        fmf.tables = [table1, table2]
+        fmftable = fmf.get_table('tab1')
+        assert fmftable == table1
+        with pytest.raises(AmbigousObject) as e_info:
+            fmf.get_table()
+    # strict API example
 
     def test_empty_fmf(self):
         assert self.fmf_object is not None
 
     def test_empty_fmf_instance(self):
-
         assert isinstance(self.fmf_object, FMF)
 
     def test_create_fmf_with_reference(self):
-
-        self.fmf_object.reference_section = self.fmf_object.set_reference(self, 'title', 'Creator', 'Created', 'Place')
-
+        self.fmf_object.reference_section = \
+            self.fmf_object.set_reference(self, 'title', \
+                                          'Creator', 'Created', 'Place')
         self.fmf_object.meta_sections.append(self.fmf_object.reference_section)
-
         assert self.fmf_object.meta_sections is not None
-
         assert len(self.fmf_object.meta_sections) > 0
 #        assert isinstance(self.fmf_object, Fmf.FMF)
 
     def test_create_fmf_meta_section(self):
         meta_section = FMF.add_meta_section(self.fmf_object, 'Name')
         self.fmf_object.meta_sections.append(meta_section)
-
         assert self.fmf_object.meta_sections is not None
-
         assert len(self.fmf_object.meta_sections) > 0
 
     def test_add_meta_section_invalid_name(self):
@@ -75,24 +161,21 @@ class Test_Fmf:
     def test_add_meta_section_existing_name(self):
         meta_section = FMF.add_meta_section(self.fmf_object, 'Name')
         self.fmf_object.meta_sections.append(meta_section)
-
         meta_section2 = FMF.add_meta_section(self.fmf_object, 'Name')
         self.fmf_object.meta_sections.append(meta_section2)
 
     def test_create_fmf_with_table(self):
-        self.fmf_object.table_sections.append(FMF.add_table(self.fmf_object, 'Table Name', 'Table Symbol'))
-
+        self.fmf_object.table_sections.append(\
+                    FMF.add_table(self.fmf_object, 'Table Name', \
+                                  'Table Symbol'))
         assert self.fmf_object.table_sections is not None
-
         assert len(self.fmf_object.table_sections) > 0
 
     def test_get_meta_section(self):
         meta_section = FMF.add_meta_section(self.fmf_object, 'Name')
         self.fmf_object.meta_sections.append(meta_section)
-
         meta_section_returned = FMF.get_meta_section(self.fmf_object, 'Name1')
         print meta_section_returned.name
-
         assert meta_section_returned is not None
 
 

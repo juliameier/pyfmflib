@@ -32,20 +32,19 @@
 
 from pyfmflib.meta_section import Meta_section
 from pyfmflib.reference_section import Reference_section
-from pyfmflib.table import Table
+from pyfmflib.table import FMFTable
 
-class FMF:
+class FMF(object):
     def __init__(self):
+        self.header = None
+        self.reference_section = None
+        self.meta_sections = []
+        self.table_sections = []
+        self.global_comments = []
+        self.compliance_level = None
 
-            self.header = None
-            self.reference_section = None
-            self.meta_sections = []
-            self.table_sections = []
-            self.global_comments = []
-            self.compliance_level = None
 
-
-    def initialize(*args, **kwargs):
+    def initialize(self, *args, **kwargs):
 
         # args represents the regular arguments
         # kwargs represents the keyword arguments
